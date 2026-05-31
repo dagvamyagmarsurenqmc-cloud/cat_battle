@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Гүнжээгийн Муурын Battle Тоглоом</title>
+    <title>Гүнжээгийн Муурын Загварын Тэмцээн</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -15,158 +15,271 @@
         }
         h1 { color: #ff66b2; text-shadow: 1px 1px 2px #fff; }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: auto;
             background: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 20px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.1);
         }
-        .cat-display {
-            font-size: 80px;
+        .budget-badge {
+            background-color: #ffd700;
+            color: #333;
+            padding: 8px 15px;
+            font-weight: bold;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .screen { display: none; }
+        .active { display: block; }
+        
+        /* Шкафны загвар */
+        .wardrobe {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 15px;
             margin: 20px 0;
-            transition: transform 0.3s;
+            padding: 15px;
+            background: #fdf6f9;
+            border-radius: 15px;
+            border: 2px dashed #ffb3d9;
         }
-        .options-group {
-            margin: 15px 0;
+        .item-card {
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            padding: 10px;
+            cursor: pointer;
+            transition: 0.2s;
         }
+        .item-card:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .item-card.selected { border-color: #ff66b2; background-color: #ffe6f2; }
+        .item-emoji { font-size: 40px; display: block; }
+        .item-price { color: #b58900; font-weight: bold; font-size: 14px; }
+        
+        .cat-preview { font-size: 90px; margin: 20px 0; min-height: 110px; }
+        
         button {
             background-color: #ff66b2;
             color: white;
             border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 10px;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 12px;
             cursor: pointer;
-            margin: 5px;
             transition: 0.2s;
         }
-        button:hover { background-color: #ff3399; transform: scale(1.05); }
-        .battle-zone {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            border: 2px dashed #ff66b2;
-            border-radius: 15px;
-            background: #fff0f5;
-        }
+        button:hover { background-color: #ff3399; transform: scale(1.03); }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* Battle талбар */
         .battle-arena {
             display: flex;
             justify-content: space-around;
             align-items: center;
-            font-size: 50px;
-            margin: 20px 0;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fff5f8;
+            border-radius: 15px;
         }
-        .vs { font-size: 24px; font-weight: bold; color: #ff3399; }
-        #log { font-weight: bold; color: #555; margin-top: 10px; }
+        .player-box { width: 45%; }
+        .vs { font-size: 30px; font-weight: bold; color: #ff3399; }
+        .score { font-size: 18px; font-weight: bold; color: #777; margin-top: 10px; }
+        .result-box {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #ff3399;
+            padding: 15px;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🐱 Муур Хувцаслах & Battle 🐱</h1>
-    <p>Гүнжээгийн тоглоомд тавтай морил!</p>
-
-    <div id="setup-screen">
-        <div class="cat-display" id="my-cat">🐱</div>
-        
-        <div class="options-group">
-            <h3>1. Муураа сонгох:</h3>
-            <button onclick="changeCat('🐱')">Шар муур</button>
-            <button onclick="changeCat('🐈')">Улаан муур</button>
-            <button onclick="changeCat('🦁')">Арслан муур</button>
-        </div>
-
-        <div class="options-group">
-            <h3>2. Хувцас/Малгай өмсгөх:</h3>
-            <button onclick="changeAccessory('👑')">Гүнж Титэм 👑</button>
-            <button onclick="changeAccessory('🎩')">Шидтэний Малгай 🎩</button>
-            <button onclick="changeAccessory('🎀')">Ягаан Тууз 🎀</button>
-            <button onclick="changeAccessory('🕶️')">Ганган Шил 🕶️</button>
-        </div>
-
-        <button style="background-color: #4caf50; font-size: 20px; margin-top: 20px;" onclick="startBattle()">
-            Тэмцээнд орох 🚀
-        </button>
+    <h1>✨ Муурын Загварын Battle ✨</h1>
+    
+    <!-- 1. МУУР СОНГОХ ДЭЛГЭЦ -->
+    <div id="screen-select-cat" class="screen active">
+        <p>Эхлээд тэмцээнд орох хөөрхөн муураа сонгоорой:</p>
+        <div class="cat-preview" id="cat-choice-preview">🐱</div>
+        <button onclick="chooseCat('🐱')">Шар муур</button>
+        <button onclick="chooseCat('🐈')">Улаан муур</button>
+        <button onclick="chooseCat('🦁')">Арслан муур</button>
+        <br><br>
+        <button style="background-color: #4caf50;" onclick="goToWardrobe()">Шкаф руу очих 👗</button>
     </div>
 
-    <div id="battle-screen" class="battle-zone">
-        <h2>⚔️ МУУРНУУДЫН ТУЛААН ⚔️</h2>
+    <!-- 2. ШКАФНААС ХУВЦАС СОНГОХ ДЭЛГЭЦ -->
+    <div id="screen-wardrobe" class="screen">
+        <div class="budget-badge">💰 Миний төсөв: <span id="budget-ui">100</span> зоос</div>
+        <p>Төсөвтөө тааруулж хамгийн загварлаг, үнэтэй хувцаснуудыг сонгоорой!</p>
+        
+        <div class="cat-preview" id="wardrobe-cat-preview">🐱</div>
+        
+        <h3>👗 Шкаф дүүрэн хувцаснууд:</h3>
+        <div class="wardrobe" id="wardrobe-items"></div>
+        
+        <button id="battle-btn" onclick="startFashionBattle()">Тэмцээнийг эхлүүлэх 👑</button>
+    </div>
+
+    <!-- 3. ТЭМЦЭЭНИЙ ДЭЛГЭЦ -->
+    <div id="screen-battle" class="screen">
+        <h2>🏆 ЗАГВАРЫН ШҮҮЛТ 🏆</h2>
+        
         <div class="battle-arena">
-            <div>
-                <div style="font-size: 16px;">Чиний муур</div>
-                <div id="player1-render">🐱</div>
+            <div class="player-box">
+                <h3>Чиний муур</h3>
+                <div class="cat-preview" id="p1-cat">🐱</div>
+                <div class="score" id="p1-score">Нийт үнэ: 0 зоос</div>
             </div>
+            
             <div class="vs">VS</div>
-            <div>
-                <div style="font-size: 16px;">Өрсөлдөгч (Онлайн)</div>
-                <div id="player2-render">🐈👑</div>
+            
+            <div class="player-box">
+                <h3>Өрсөлдөгч (Онлайн)</h3>
+                <div class="cat-preview" id="p2-cat">🐈</div>
+                <div class="score" id="p2-score">Нийт үнэ: 0 зоос</div>
             </div>
         </div>
-        <button onclick="attack()">Довтлох! 🐾</button>
-        <div id="log">Өрсөлдөгчийг хүлээж байна...</div>
-        <button style="background-color: #aaa; margin-top: 20px;" onclick="resetGame()">Дахин эхлэх</button>
+
+        <div class="result-box" id="battle-result">Шүүгчид оноог тоолж байна...</div>
+        
+        <button style="background-color: #666;" onclick="restartGame()">Дахин тоглох 🔄</button>
     </div>
 </div>
 
 <script>
-    let currentCat = '🐱';
-    let currentAccessory = '';
-    let enemyScore = 3;
-    let myScore = 3;
+    // Тоглоомын өгөгдөл
+    let budget = 100;
+    let selectedCat = '🐱';
+    let selectedAccessories = [];
+    
+    // Шкафны гоё хувцаснууд (Үнэтэй нь илүү гоё чанартай)
+    const wardrobeClothes = [
+        { id: 1, name: 'Ягаан Тууз', emoji: '🎀', price: 15 },
+        { id: 2, name: 'Ганган Шил', emoji: '🕶️', price: 25 },
+        { id: 3, name: 'Шидтэний Малгай', emoji: '🎩', price: 40 },
+        { id: 4, name: 'Алтан Титэм', emoji: '👑', price: 60 },
+        { id: 5, name: 'Улаан Цув', emoji: '🧥', price: 35 },
+        { id: 6, name: 'Дулаан Свитер', emoji: '👚', price: 20 },
+        { id: 7, name: 'Гялалздаг Хүзүүвч', emoji: '💎', price: 50 },
+        { id: 8, name: 'Загварын Цүнх', emoji: '👜', price: 30 }
+    ];
 
-    function changeCat(catEmoji) {
-        currentCat = catEmoji;
-        document.getElementById('my-cat').innerText = currentCat + currentAccessory;
+    function changeScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
     }
 
-    function changeAccessory(accEmoji) {
-        currentAccessory = accEmoji;
-        document.getElementById('my-cat').innerText = currentCat + currentAccessory;
+    // 1. Муур сонгох
+    function chooseCat(cat) {
+        selectedCat = cat;
+        document.getElementById('cat-choice-preview').innerText = selectedCat;
     }
 
-    function startBattle() {
-        document.getElementById('setup-screen').style.display = 'none';
-        document.getElementById('battle-screen').style.display = 'block';
-        
-        // Чиний муурыг тулааны талбарт харуулах
-        document.getElementById('player1-render').innerText = currentCat + currentAccessory;
-        
-        // Онлайн байгаа мэт дүр үзүүлэх робот тоглогч (Гүнжээ яг жинхэнэ онлайн болгохын тулд дараа нь Firebase холбож болно)
-        const botCats = ['🐱', '🐈', '🦁'];
-        const botAcc = ['👑', '🎩', '🎀', '🕶️'];
-        let randomCat = botCats[Math.floor(Math.random() * botCats.length)];
-        let randomAcc = botAcc[Math.floor(Math.random() * botAcc.length)];
-        
-        document.getElementById('player2-render').innerText = randomCat + randomAcc;
-        document.getElementById('log').innerText = "Тулаан эхэллээ! 'Довтлох' товчлуур дээр дараарай.";
+    function goToWardrobe() {
+        changeScreen('screen-wardrobe');
+        updateWardrobeUI();
     }
 
-    function attack() {
-        if(enemyScore <= 0 || myScore <= 0) return;
+    // 2. Шкафны хэсэг
+    function updateWardrobeUI() {
+        document.getElementById('budget-ui').innerText = budget;
+        
+        // Муурыг одоогийн өмссөн хувцастай нь харуулах
+        let accessoriesText = selectedAccessories.map(a => a.emoji).join('');
+        document.getElementById('wardrobe-cat-preview').innerText = selectedCat + accessoriesText;
+        
+        // Шкаф доторх хувцаснуудыг зурах
+        const container = document.getElementById('wardrobe-items');
+        container.innerHTML = '';
+        
+        wardrobeClothes.forEach(item => {
+            const isSelected = selectedAccessories.some(a => a.id === item.id);
+            const card = document.createElement('div');
+            card.className = `item-card ${isSelected ? 'selected' : ''}`;
+            card.onclick = () => toggleItem(item);
+            
+            card.innerHTML = `
+                <span class="item-emoji">${item.emoji}</span>
+                <div style="font-weight:bold; font-size:13px;">${item.name}</div>
+                <div class="item-price">💰 ${item.price}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
 
-        // Санамсаргүй байдлаар хэн нэгэн нь хожно
-        let chance = Math.random();
-        if(chance > 0.4) {
-            enemyScore--;
-            document.getElementById('log').innerText = "Амжилттай! Чиний муур өрсөлдөгчийг маажчихлаа! 🐾";
+    function toggleItem(item) {
+        const index = selectedAccessories.findIndex(a => a.id === item.id);
+        
+        if (index > -1) {
+            // Хувцсыг тайлах
+            budget += item.price;
+            selectedAccessories.splice(index, 1);
         } else {
-            myScore--;
-            document.getElementById('log').innerText = "Өвөөг! Өрсөлдөгч муур чамайг мөргөчихлөө! 🙀";
+            // Хувцсыг өмсөх (Төсөв хүрэлцэж байвал)
+            if (budget >= item.price) {
+                budget -= item.price;
+                selectedAccessories.push(item);
+            } else {
+                alert("Уучлаарай, Гүнжээ! Энэ хувцсыг авахад зоос чинь хүрэхгүй байна. 😿");
+            }
         }
+        updateWardrobeUI();
+    }
 
-        if(enemyScore <= 0) {
-            document.getElementById('log').innerText = "Баяр хүргэе! Гүнжээгийн муур ХОЖЛОО! 🎉🏆";
-        } else if(myScore <= 0) {
-            document.getElementById('log').innerText = "Харамсалтай нь ялагдлаа. Дахин оролдоод үзээрэй! 💪";
+    // 3. Тэмцээний хэсэг
+    function startFashionBattle() {
+        changeScreen('screen-battle');
+        
+        // 1. Тоглогчийн муурыг харуулах ба оноог тооцох (Оноо = Хувцасны нийт үнэ)
+        let myTotalScore = selectedAccessories.reduce((sum, item) => sum + item.price, 0);
+        let myAccText = selectedAccessories.map(a => a.emoji).join('');
+        document.getElementById('p1-cat').innerText = selectedCat + myAccText;
+        document.getElementById('p1-score').innerText = `Нийт үнэ: ${myTotalScore} зоос`;
+        
+        // 2. Онлайн өрсөлдөгч муурыг санамсаргүй хувцаслах (Тэр бас 100 зоосонд багтах ёстой)
+        const botCats = ['🐱', '🐈', '🦁'];
+        let botCat = botCats[Math.floor(Math.random() * botCats.length)];
+        let botBudget = 100;
+        let botAccessories = [];
+        
+        // Робот хувцас сонгож байна
+        let shuffledItems = [...wardrobeClothes].sort(() => 0.5 - Math.random());
+        for (let item of shuffledItems) {
+            if (botBudget >= item.price && Math.random() > 0.3) {
+                botBudget -= item.price;
+                botAccessories.push(item);
+            }
+        }
+        
+        let botTotalScore = botAccessories.reduce((sum, item) => sum + item.price, 0);
+        let botAccText = botAccessories.map(a => a.emoji).join('');
+        document.getElementById('p2-cat').innerText = botCat + botAccText;
+        document.getElementById('p2-score').innerText = `Нийт үнэ: ${botTotalScore} зоос`;
+        
+        // 3. Хэн илүү үнэтэй, гоё хувцасласныг шалгаруулах
+        const resultBox = document.getElementById('battle-result');
+        if (myTotalScore > botTotalScore) {
+            resultBox.innerHTML = `🎉 Баяр хүргэе! Гүнжээгийн муур илүү гоё, үнэтэй хувцасласан тул ЗАГВАРЫН ТЭМЦЭЭНД ХОЖЛОО! 🏆👑`;
+            resultBox.style.color = "#4caf50";
+        } else if (myTotalScore < botTotalScore) {
+            resultBox.innerHTML = `😿 Өрсөлдөгч муур илүү их зоос гаргаж гоёсон тул яллаа. Дараагийн удаа төсвөө сайн ашиглаарай! 💪`;
+            resultBox.style.color = "#ff3399";
+        } else {
+            resultBox.innerHTML = `🤝 Тэнцлээ! Хоёр муур хоёулаа яг ижилхэн үнэтэй хувцас сонгосон байна! ✨`;
+            resultBox.style.color = "#ff9800";
         }
     }
 
-    function resetGame() {
-        enemyScore = 3;
-        myScore = 3;
-        document.getElementById('setup-screen').style.display = 'block';
-        document.getElementById('battle-screen').style.display = 'none';
+    function restartGame() {
+        budget = 100;
+        selectedAccessories = [];
+        chooseCat('🐱');
+        changeScreen('screen-select-cat');
     }
 </script>
 
