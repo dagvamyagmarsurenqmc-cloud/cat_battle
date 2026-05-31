@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гүнжээгийн Муурын Battle Тоглоом</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffe6f2, #e6f2ff);
+            text-align: center;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { color: #ff66b2; text-shadow: 1px 1px 2px #fff; }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .cat-display {
+            font-size: 80px;
+            margin: 20px 0;
+            transition: transform 0.3s;
+        }
+        .options-group {
+            margin: 15px 0;
+        }
+        button {
+            background-color: #ff66b2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 5px;
+            transition: 0.2s;
+        }
+        button:hover { background-color: #ff3399; transform: scale(1.05); }
+        .battle-zone {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px dashed #ff66b2;
+            border-radius: 15px;
+            background: #fff0f5;
+        }
+        .battle-arena {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 50px;
+            margin: 20px 0;
+        }
+        .vs { font-size: 24px; font-weight: bold; color: #ff3399; }
+        #log { font-weight: bold; color: #555; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🐱 Муур Хувцаслах & Battle 🐱</h1>
+    <p>Гүнжээгийн тоглоомд тавтай морил!</p>
+
+    <div id="setup-screen">
+        <div class="cat-display" id="my-cat">🐱</div>
+        
+        <div class="options-group">
+            <h3>1. Муураа сонгох:</h3>
+            <button onclick="changeCat('🐱')">Шар муур</button>
+            <button onclick="changeCat('🐈')">Улаан муур</button>
+            <button onclick="changeCat('🦁')">Арслан муур</button>
+        </div>
+
+        <div class="options-group">
+            <h3>2. Хувцас/Малгай өмсгөх:</h3>
+            <button onclick="changeAccessory('👑')">Гүнж Титэм 👑</button>
+            <button onclick="changeAccessory('🎩')">Шидтэний Малгай 🎩</button>
+            <button onclick="changeAccessory('🎀')">Ягаан Тууз 🎀</button>
+            <button onclick="changeAccessory('🕶️')">Ганган Шил 🕶️</button>
+        </div>
+
+        <button style="background-color: #4caf50; font-size: 20px; margin-top: 20px;" onclick="startBattle()">
+            Тэмцээнд орох 🚀
+        </button>
+    </div>
+
+    <div id="battle-screen" class="battle-zone">
+        <h2>⚔️ МУУРНУУДЫН ТУЛААН ⚔️</h2>
+        <div class="battle-arena">
+            <div>
+                <div style="font-size: 16px;">Чиний муур</div>
+                <div id="player1-render">🐱</div>
+            </div>
+            <div class="vs">VS</div>
+            <div>
+                <div style="font-size: 16px;">Өрсөлдөгч (Онлайн)</div>
+                <div id="player2-render">🐈👑</div>
+            </div>
+        </div>
+        <button onclick="attack()">Довтлох! 🐾</button>
+        <div id="log">Өрсөлдөгчийг хүлээж байна...</div>
+        <button style="background-color: #aaa; margin-top: 20px;" onclick="resetGame()">Дахин эхлэх</button>
+    </div>
+</div>
+
+<script>
+    let currentCat = '🐱';
+    let currentAccessory = '';
+    let enemyScore = 3;
+    let myScore = 3;
+
+    function changeCat(catEmoji) {
+        currentCat = catEmoji;
+        document.getElementById('my-cat').innerText = currentCat + currentAccessory;
+    }
+
+    function changeAccessory(accEmoji) {
+        currentAccessory = accEmoji;
+        document.getElementById('my-cat').innerText = currentCat + currentAccessory;
+    }
+
+    function startBattle() {
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('battle-screen').style.display = 'block';
+        
+        // Чиний муурыг тулааны талбарт харуулах
+        document.getElementById('player1-render').innerText = currentCat + currentAccessory;
+        
+        // Онлайн байгаа мэт дүр үзүүлэх робот тоглогч (Гүнжээ яг жинхэнэ онлайн болгохын тулд дараа нь Firebase холбож болно)
+        const botCats = ['🐱', '🐈', '🦁'];
+        const botAcc = ['👑', '🎩', '🎀', '🕶️'];
+        let randomCat = botCats[Math.floor(Math.random() * botCats.length)];
+        let randomAcc = botAcc[Math.floor(Math.random() * botAcc.length)];
+        
+        document.getElementById('player2-render').innerText = randomCat + randomAcc;
+        document.getElementById('log').innerText = "Тулаан эхэллээ! 'Довтлох' товчлуур дээр дараарай.";
+    }
+
+    function attack() {
+        if(enemyScore <= 0 || myScore <= 0) return;
+
+        // Санамсаргүй байдлаар хэн нэгэн нь хожно
+        let chance = Math.random();
+        if(chance > 0.4) {
+            enemyScore--;
+            document.getElementById('log').innerText = "Амжилттай! Чиний муур өрсөлдөгчийг маажчихлаа! 🐾";
+        } else {
+            myScore--;
+            document.getElementById('log').innerText = "Өвөөг! Өрсөлдөгч муур чамайг мөргөчихлөө! 🙀";
+        }
+
+        if(enemyScore <= 0) {
+            document.getElementById('log').innerText = "Баяр хүргэе! Гүнжээгийн муур ХОЖЛОО! 🎉🏆";
+        } else if(myScore <= 0) {
+            document.getElementById('log').innerText = "Харамсалтай нь ялагдлаа. Дахин оролдоод үзээрэй! 💪";
+        }
+    }
+
+    function resetGame() {
+        enemyScore = 3;
+        myScore = 3;
+        document.getElementById('setup-screen').style.display = 'block';
+        document.getElementById('battle-screen').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
