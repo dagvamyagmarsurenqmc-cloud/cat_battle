@@ -3,90 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Гүнжээгийн Муурын Maze Battle</title>
+    <title>Гүнжээгийн Супер Муурын Maze</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+            background: linear-gradient(135deg, #6c5ce7, #a18cd1);
             text-align: center;
             color: #333;
             margin: 0;
-            padding: 15px;
+            padding: 10px;
             user-select: none;
+            overflow-x: hidden;
         }
-        h1 { color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); margin: 5px 0; }
+        h1 { color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); margin: 5px 0; font-size: 24px; }
         .container {
-            max-width: 600px;
+            max-width: 95vw;
             margin: auto;
             background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
+            padding: 15px;
             border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
         .stats {
             display: flex;
             justify-content: space-around;
-            background: #333;
+            background: #2d3436;
             color: white;
-            padding: 10px;
+            padding: 8px;
             border-radius: 12px;
             font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 15px;
+            font-size: 15px;
+            margin-bottom: 10px;
         }
-        /* Төөрдөг байшингийн хүрээ */
-        #maze-container {
-            display: inline-block;
-            background: #222;
-            padding: 10px;
+        /* Том мэйзийг гүйлгэж харах боломжтой болгох */
+        #maze-scroll-wrapper {
+            max-width: 100%;
+            max-height: 60vh;
+            overflow: auto;
+            background: #1e272e;
+            padding: 5px;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            border: 3px solid #2d3436;
         }
         .grid {
             display: grid;
             gap: 1px;
-            background: #444;
+            background: #2d3436;
+            margin: auto;
         }
         .cell {
-            width: 35px;
-            height: 35px;
+            width: 22px;
+            height: 22px;
             background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            font-weight: bold;
+            font-size: 14px;
         }
         .wall { background: #2c3e50; } /* Хана */
         .path { background: #f5f6fa; } /* Зам */
         .start { background: #4cd137; } /* Эхлэл */
-        .end { background: #e84118; animation: pulse 1s infinite alternate; } /* Бариа */
-        
-        @keyframes pulse {
-            from { background: #e84118; } to { background: #ff7675; }
-        }
-
-        /* Утасны товчлуурууд */
-        .controls {
-            margin-top: 15px;
-            display: grid;
-            grid-template-columns: repeat(3, 60px);
-            gap: 10px;
-            justify-content: center;
-        }
-        .ctrl-btn {
-            width: 60px;
-            height: 50px;
-            background: #a18cd1;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px rgba(0,0,0,0.2);
-        }
-        .ctrl-btn:active { transform: translateY(3px); box-shadow: 0 1px rgba(0,0,0,0.2); }
+        .end { background: #e84118; font-weight: bold; } /* Бариа */
         
         .btn-action {
             background: #ff7675;
@@ -97,35 +75,27 @@
             border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
-            margin-top: 15px;
+            margin-top: 10px;
         }
-        #message { font-size: 18px; font-weight: bold; margin: 10px 0; color: #444; }
+        #message { font-size: 16px; font-weight: bold; margin: 8px 0; color: #d63031; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🐱 Муурын Төөрдөг Байшин 🏁</h1>
-    <p style="margin: 5px 0;">Гарны <b>Сумтай товчлууроор</b> эсвэл доорх товчоор муураа удирдан барианд (🚩) хүргээрэй!</p>
+    <h1>🐱 Гүнжээгийн Хурдны Мэйз Battle 🏁</h1>
+    <p style="margin: 3px 0; font-size: 14px;">Компьютерын гарны <b>4 Сумтай товчлуураар (▲ ▼ ◀ ▶)</b> муураа удирдаарай!</p>
     
     <div class="stats">
-        <div>🆙 Үе (Level): <span id="ui-level">1</span></div>
-        <div>🐟 Миний оноо: <span id="ui-score">0</span></div>
+        <div>🆙 Үе: <span id="ui-level">1</span> (<span id="ui-dims">20x20</span>)</div>
+        <div>🐟 Оноо: <span id="ui-score">0</span></div>
         <div>🤖 Өрсөлдөгч: <span id="ui-bot">0%</span> ирсэн</div>
     </div>
 
-    <div id="message">Амттай хоолнуудаа идэж оноо цуглуулаарай!</div>
+    <div id="message">Гарны сумаар хурдан хөдөлж барианд (🚩) хүрээрэй!</div>
 
-    <div id="maze-container">
+    <div id="maze-scroll-wrapper">
         <div id="maze" class="grid"></div>
-    </div>
-
-    <!-- Дэлгэц дээрх удирдлага (Утас эсвэл таблет дээр тоглоход амар) -->
-    <div class="controls">
-        <div></div><button class="ctrl-btn" onclick="moveCat(0, -1)">▲</button><div></div>
-        <button class="ctrl-btn" onclick="moveCat(-1, 0)">◀</button>
-        <button class="ctrl-btn" onclick="moveCat(0, 1)">▼</button>
-        <button class="ctrl-btn" onclick="moveCat(1, 0)">▶</button>
     </div>
 
     <button class="btn-action" onclick="restartGame()">Шинээр эхлэх 🔄</button>
@@ -134,122 +104,106 @@
 <script>
     let level = 1;
     let score = 0;
-    let catPos = { x: 0, y: 0 };
-    let mazeSize = 9; // Эхний үеийн хэмжээ 9х9
+    let catPos = { x: 1, y: 1 };
+    let mazeSize = 20; // Үе 1: 20, Үе 2: 30, Үе 3: 50
     let map = [];
     let botProgress = 0;
     let botTimer = null;
     let gameActive = true;
 
-    // Үеүдийн газрын зураг (1 = Хана, 0 = Зам, S = Эхлэл, E = Бариа, F = Загас, M = Хулгана)
-    // Гүнжээ, үе ахих тусам төөрдөг байшин томорч, зам нь хэцүү болно!
-    const levelsData = {
-        1: {
-            size: 9,
-            grid: [
-                ['S', 0, 1, 0, 'F', 0, 1, 0, 'M'],
-                [1, 0, 1, 0, 1, 0, 1, 1, 0],
-                [1, 'M', 0, 0, 1, 'F', 0, 0, 0],
-                [1, 1, 1, 0, 1, 1, 1, 1, 0],
-                [0, 0, 0, 'F', 0, 0, 0, 1, 0],
-                [0, 1, 1, 1, 1, 1, 0, 1, 0],
-                [0, 1, 'M', 0, 0, 1, 0, 0, 0],
-                [0, 1, 0, 1, 0, 1, 1, 1, 0],
-                ['F', 0, 0, 1, 0, 0, 0, 0, 'E']
-            ]
-        },
-        2: {
-            size: 11,
-            grid: [
-                ['S', 1, 0, 0, 0, 1, 'M', 0, 0, 0, 'F'],
-                [0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0],
-                [0, 0, 'F', 1, 'M', 0, 0, 0, 0, 1, 0],
-                [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0],
-                [0, 0, 0, 0, 0, 'F', 0, 1, 0, 0, 0],
-                [0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1],
-                [0, 1, 'M', 0, 0, 1, 0, 0, 0, 'M', 0],
-                [0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0],
-                [0, 1, 0, 1, 0, 0, 0, 'F', 0, 1, 0],
-                [0, 0, 'F', 1, 1, 1, 1, 1, 0, 1, 0],
-                [1, 1, 0, 0, 0, 'M', 0, 0, 0, 1, 'E']
-            ]
-        },
-        3: { // Хамгийн том, хамгийн хэцүү үе!
-            size: 13,
-            grid: [
-                ['S', 0, 0, 1, 'F', 0, 0, 1, 0, 0, 0, 0, 'M'],
-                [1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0],
-                ['M', 0, 0, 0, 0, 1, 0, 1, 'F', 1, 'F', 0, 0],
-                [1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1],
-                [0, 0, 'F', 1, 0, 1, 0, 0, 0, 1, 0, 1, 'M'],
-                [0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0],
-                [0, 1, 0, 0, 'M', 0, 0, 1, 0, 0, 0, 1, 0],
-                [0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0],
-                [0, 0, 0, 'F', 0, 1, 0, 0, 0, 'M', 0, 0, 0],
-                [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-                ['M', 0, 0, 1, 0, 0, 0, 'F', 0, 1, 'F', 0, 0],
-                [0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1],
-                ['F', 1, 0, 0, 0, 'M', 0, 0, 0, 1, 0, 0, 'E']
-            ]
+    // Автоматаар үргэлж гарцтай Мэйз үүсгэх ухаалаг алгоритм (DFS)
+    function generateMaze(size) {
+        let matrix = Array(size).fill().map(() => Array(size).fill(1));
+        
+        function walk(cx, cy) {
+            matrix[cy][cx] = 0;
+            
+            let dirs = [[0, -2], [0, 2], [-2, 0], [2, 0]].sort(() => Math.random() - 0.5);
+            
+            for (let [dx, dy] of dirs) {
+                let nx = cx + dx, ny = cy + dy;
+                if (nx > 0 && nx < size - 1 && ny > 0 && ny < size - 1 && matrix[ny][nx] === 1) {
+                    matrix[cy + dy/2][cx + dx/2] = 0;
+                    walk(nx, ny);
+                }
+            }
         }
-    };
+        
+        walk(1, 1);
+        
+        // Эхлэл ба Бариаг тавих
+        matrix[1][1] = 'S';
+        matrix[size - 2][size - 2] = 'E';
+        
+        // Зам дагуу санамсаргүй загас, хулгана цацах
+        for(let y=1; y<size-1; y++) {
+            for(let x=1; x<size-1; x++) {
+                if(matrix[y][x] === 0 && Math.random() < 0.08) {
+                    matrix[y][x] = Math.random() > 0.4 ? 'F' : 'M';
+                }
+            }
+        }
+        return matrix;
+    }
 
     function initGame() {
         gameActive = true;
-        let data = levelsData[level];
-        mazeSize = data.size;
-        // Газрын зургийг хуулбарлаж авна (хоолнуудыг нь идэхэд устгахын тулд)
-        map = JSON.parse(JSON.stringify(data.grid)); 
-        
-        catPos = { x: 0, y: 0 };
-        botProgress = 0;
-        
+        if (level === 1) mazeSize = 20;
+        else if (level === 2) mazeSize = 30;
+        else if (level === 3) mazeSize = 50;
+
         document.getElementById('ui-level').innerText = level;
+        document.getElementById('ui-dims').innerText = `${mazeSize}x${mazeSize}`;
         document.getElementById('ui-score').innerText = score;
         document.getElementById('ui-bot').innerText = "0%";
-        document.getElementById('message').innerText = `Үе ${level}: Барианд орохоос өмнө амттан цуглуулаарай!`;
+        document.getElementById('message').innerText = `Гарны сумаар гүйгээрэй! Өрсөлдөгч хөөж байгаа шүү!`;
+
+        map = generateMaze(mazeSize);
+        catPos = { x: 1, y: 1 };
+        botProgress = 0;
 
         renderMaze();
         
-        // Онлайн өрсөлдөгч робот цаанаас чинь хөөж эхэлнэ
+        // Камерны фокусыг муурын байрлал дээр аваачих
+        scrollCenter();
+
+        // Роботыг Гүнжээд ялах боломж олгохоор зөөлөн хурдтай болгов
         if(botTimer) clearInterval(botTimer);
-        let botSpeed = 2500 - (level * 500); // Үе ахих тусам робот хурдан гүйнэ!
+        let botIntervalTime = 1200 + (level * 400); // Том мэйзд робот удаан явна
         botTimer = setInterval(() => {
             if(!gameActive) return;
-            botProgress += Math.floor(Math.random() * 8) + 4;
+            botProgress += Math.floor(Math.random() * 3) + 1; // 1-3 хувиар ахина
             if(botProgress > 100) botProgress = 100;
             document.getElementById('ui-bot').innerText = botProgress + "%";
             
             if(botProgress >= 100) {
-                endGame(false); // Робот түрүүлээд барианд орчихвол
+                endGame(false);
             }
-        }, botSpeed);
+        }, botIntervalTime);
     }
 
     function renderMaze() {
         const mazeContainer = document.getElementById('maze');
-        mazeContainer.style.gridTemplateColumns = `repeat(${mazeSize}, 35px)`;
+        mazeContainer.style.gridTemplateColumns = `repeat(${mazeSize}, 22px)`;
         mazeContainer.innerHTML = '';
 
         for (let y = 0; y < mazeSize; y++) {
             for (let x = 0; x < mazeSize; x++) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                
                 let tile = map[y][x];
                 
-                if (tile === 1) cell.classList.add('wall');
-                else if (tile === 0) cell.classList.add('path');
-                else if (tile === 'S') cell.classList.add('start');
-                else if (tile === 'E') { cell.classList.add('end'); cell.innerText = '🚩'; }
-                else if (tile === 'F') { cell.classList.add('path'); cell.innerText = '🐟'; }
-                else if (tile === 'M') { cell.classList.add('path'); cell.innerText = '🐭'; }
+                if (tile === 1) cell.className = 'cell wall';
+                else if (tile === 0) cell.className = 'cell path';
+                else if (tile === 'S') cell.className = 'cell start';
+                else if (tile === 'E') { cell.className = 'cell end'; cell.innerText = '🚩'; }
+                else if (tile === 'F') { cell.className = 'cell path'; cell.innerText = '🐟'; }
+                else if (tile === 'M') { cell.className = 'cell path'; cell.innerText = '🐭'; }
                 
-                // Муурны одоогийн байрлал
                 if (catPos.x === x && catPos.y === y) {
                     cell.innerText = '🐱';
+                    cell.style.backgroundColor = '#ffe6f2';
                 }
-                
                 mazeContainer.appendChild(cell);
             }
         }
@@ -261,27 +215,25 @@
         let newX = catPos.x + dx;
         let newY = catPos.y + dy;
 
-        // Мэйзээс гарахгүй бөгөөд хана мөргөхгүй байхыг шалгана
         if (newX >= 0 && newX < mazeSize && newY >= 0 && newY < mazeSize) {
             if (map[newY][newX] !== 1) { 
                 catPos.x = newX;
                 catPos.y = newY;
                 
-                // Замдаа юм идвэл оноо авна
                 if (map[newY][newX] === 'F') {
-                    score += 15; // Загас 15 оноо
+                    score += 15;
                     map[newY][newX] = 0;
-                    document.getElementById('message').innerText = "Амттай загас идлээ! +15 оноо 🐟";
+                    document.getElementById('message').innerText = "Загас идлээ! +15 оноо 🐟";
                 } else if (map[newY][newX] === 'M') {
-                    score += 25; // Хулгана 25 оноо
+                    score += 25;
                     map[newY][newX] = 0;
-                    document.getElementById('message').innerText = "Хурдан хулгана барилаа! +25 оноо 🐭";
+                    document.getElementById('message').innerText = "Хулгана барилаа! +25 оноо 🐭";
                 }
                 
                 document.getElementById('ui-score').innerText = score;
                 renderMaze();
+                scrollCenter(); // Муурыг дагаж дэлгэц гүйнэ
                 
-                // Барианд орсон эсэхийг шалгах
                 if (map[newY][newX] === 'E') {
                     endGame(true);
                 }
@@ -289,23 +241,32 @@
         }
     }
 
+    function scrollCenter() {
+        // Том мэйз дундуур явахад муурыг дэлгэцийн голд харуулах
+        const wrapper = document.getElementById('maze-scroll-wrapper');
+        let targetX = catPos.x * 23 - wrapper.clientWidth / 2;
+        let targetY = catPos.y * 23 - wrapper.clientHeight / 2;
+        wrapper.scrollLeft = targetX;
+        wrapper.scrollTop = targetY;
+    }
+
     function endGame(isCatWin) {
         gameActive = false;
         clearInterval(botTimer);
-        
         const msg = document.getElementById('message');
+        
         if (isCatWin) {
             if (level < 3) {
-                msg.innerHTML = `<span style="color:#4cd137;">🎉 ТҮРҮҮЛЛЭЭ! Гүнжээ роботоос өмнө барианд орлоо! Одоо дараагийн үе рүү...</span>`;
+                msg.innerHTML = `<span style="color:#4cd137;">🎉 ЯЛЛАА! Гүнжээ роботоос өмнө барианд орлоо! Одоо дараагийн том үе рүү...</span>`;
                 setTimeout(() => {
                     level++;
                     initGame();
-                }, 2500);
+                }, 2000);
             } else {
-                msg.innerHTML = `<span style="color:#fbc531;">🏆 БАЯР ХҮРГЭЕ! Гүнжээ бүх Maze-ийг дуусгаж, нийт ${score} оноотойгоор ТОГЛООМЫН СУПЕР ЯЛАГЧ боллоо! 👑</span>`;
+                msg.innerHTML = `<span style="color:#fbc531;">🏆 СУПЕР ГҮНЖЭЭ! 50х50 хэмжээтэй асар том төөрдөг байшинг дуусгаж СУПЕР ЯЛАГЧ боллоо! 🎉</span>`;
             }
         } else {
-            msg.innerHTML = `<span style="color:#e84118;">😿 ХАРАМСАЛТАЙ НЬ ЯЛАГДЛАА! Өрсөлдөгч онлайн муур түрүүлээд 100% барианд орчихлоо. Дахин оролдоод үзээрэй!</span>`;
+            msg.innerHTML = `<span style="color:#e84118;">😿 Робот түрүүлчихлээ. Гэхдээ битгий бууж өгөөрэй, "Дахин эхлэх" дараад үзээрэй!</span>`;
         }
     }
 
@@ -315,15 +276,17 @@
         initGame();
     }
 
-    // Компьютерын гарны сумаар удирдах хэсэг
-    window.addEventListener('keydown', (e) => {
-        if(e.key === "ArrowUp" || e.key === "w") moveCat(0, -1);
-        if(e.key === "ArrowDown" || e.key === "s") moveCat(0, 1);
-        if(e.key === "ArrowLeft" || e.key === "a") moveCat(-1, 0);
-        if(e.key === "ArrowRight" || e.key === "d") moveCat(1, 0);
+    // КИЙБОРДНЫ 4 СУМААР УДИРДАХ ЖИНХЭНЭ ХЭСЭГ
+    window.addEventListener('keydown', function(e) {
+        if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].indexOf(e.key) > -1) {
+            e.preventDefault(); // Гарны сумаар дарахад дэлгэц бүтнээрээ доошоо гүйхээс сэргийлнэ
+        }
+        if(e.key === "ArrowUp")   moveCat(0, -1);
+        if(e.key === "ArrowDown") moveCat(0, 1);
+        if(e.key === "ArrowLeft") moveCat(-1, 0);
+        if(e.key === "ArrowRight") moveCat(1, 0);
     });
 
-    // Тоглоомыг эхлүүлэх
     window.onload = initGame;
 </script>
 
