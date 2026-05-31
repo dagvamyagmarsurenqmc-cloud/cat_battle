@@ -3,371 +3,328 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Гүнжээгийн Муурын Загвар ба Математик</title>
+    <title>Гүнжээгийн Муурын Maze Battle</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #fbc531, #4cd137, #487eb0);
+            background: linear-gradient(135deg, #a18cd1, #fbc2eb);
             text-align: center;
             color: #333;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
+            user-select: none;
         }
-        h1 { color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); margin-top: 5px; }
+        h1 { color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); margin: 5px 0; }
         .container {
-            max-width: 750px;
+            max-width: 600px;
             margin: auto;
             background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 25px;
-            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
-        }
-        .stats-bar {
-            display: flex;
-            justify-content: space-around;
-            background: #2f3640;
-            color: white;
-            padding: 12px;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        .screen { display: none; }
-        .active { display: block; }
-        
-        /* Даалгаврын хэсэг */
-        .math-box {
-            background: #f5f6fa;
-            border: 3px solid #4cd137;
-            padding: 25px;
-            border-radius: 20px;
-            margin: 20px 0;
-        }
-        .math-question { font-size: 36px; font-weight: bold; color: #2f3640; margin-bottom: 15px; }
-        .math-input {
-            font-size: 24px;
-            padding: 8px;
-            width: 150px;
-            text-align: center;
-            border: 2px solid #353b48;
-            border-radius: 10px;
-        }
-
-        /* Шкафны хэсэг */
-        .wardrobe {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-        .item-card {
-            background: white;
-            border: 2px solid #dcdde1;
-            border-radius: 15px;
-            padding: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .item-card.owned { border-color: #4cd137; background-color: #e1f5fe; }
-        .item-card.equipped { border-color: #e84118; background-color: #fbc531; font-weight: bold; }
-        .item-emoji { font-size: 45px; display: block; }
-        .item-price { color: #e84118; font-weight: bold; }
-        .item-power { color: #4cd137; font-size: 13px; font-weight: bold; }
-
-        .cat-preview { font-size: 100px; margin: 20px 0; min-height: 120px; }
-        
-        button {
-            background-color: #487eb0;
-            color: white;
-            border: none;
-            padding: 12px 28px;
-            font-size: 18px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        button:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-        .btn-success { background-color: #4cd137; }
-        .btn-danger { background-color: #e84118; }
-
-        /* Battle талбар */
-        .battle-arena {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            margin: 30px 0;
-            background: #f5f6fa;
             padding: 20px;
             border-radius: 20px;
-            border: 3px solid #fbc531;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
-        .vs { font-size: 35px; font-weight: bold; color: #e84118; }
-        #battle-log { font-size: 20px; font-weight: bold; margin: 20px 0; color: #2f3640; }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        /* Төөрдөг байшингийн хүрээ */
+        #maze-container {
+            display: inline-block;
+            background: #222;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .grid {
+            display: grid;
+            gap: 1px;
+            background: #444;
+        }
+        .cell {
+            width: 35px;
+            height: 35px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .wall { background: #2c3e50; } /* Хана */
+        .path { background: #f5f6fa; } /* Зам */
+        .start { background: #4cd137; } /* Эхлэл */
+        .end { background: #e84118; animation: pulse 1s infinite alternate; } /* Бариа */
+        
+        @keyframes pulse {
+            from { background: #e84118; } to { background: #ff7675; }
+        }
+
+        /* Утасны товчлуурууд */
+        .controls {
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 10px;
+            justify-content: center;
+        }
+        .ctrl-btn {
+            width: 60px;
+            height: 50px;
+            background: #a18cd1;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px rgba(0,0,0,0.2);
+        }
+        .ctrl-btn:active { transform: translateY(3px); box-shadow: 0 1px rgba(0,0,0,0.2); }
+        
+        .btn-action {
+            background: #ff7675;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        #message { font-size: 18px; font-weight: bold; margin: 10px 0; color: #444; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🐈 Мяу-Математик & Загварын Тэмцэгчид 🐈</h1>
+    <h1>🐱 Муурын Төөрдөг Байшин 🏁</h1>
+    <p style="margin: 5px 0;">Гарны <b>Сумтай товчлууроор</b> эсвэл доорх товчоор муураа удирдан барианд (🚩) хүргээрэй!</p>
     
-    <!-- ДЭЭД СТАТ СУУРЬ -->
-    <div class="stats-bar">
-        <div>💰 Зоос: <span id="global-coins">0</span></div>
-        <div>⭐ Загварын чадал: <span id="global-power">0</span></div>
+    <div class="stats">
+        <div>🆙 Үе (Level): <span id="ui-level">1</span></div>
+        <div>🐟 Миний оноо: <span id="ui-score">0</span></div>
+        <div>🤖 Өрсөлдөгч: <span id="ui-bot">0%</span> ирсэн</div>
     </div>
 
-    <!-- 1. НҮҮР ХУУДАС / МУУР СОНГОХ -->
-    <div id="screen-main" class="screen active">
-        <p>Гүнжээ, чи бэлэн үү? Эхлээд муураа сонгоод, даалгавар биелүүлж зоос цуглуулаарай!</p>
-        <div class="cat-preview" id="main-cat-view">🐱</div>
-        <button onclick="changeCat('🐱')">Шар муур</button>
-        <button onclick="changeCat('🐈')">Улаан муур</button>
-        <button onclick="changeCat('🦁')">Арслан муур</button>
-        <br><br><br>
-        <button class="btn-success" onclick="goMathScreen()">✏️ Даалгавар хийж зоос олох</button>
-        <button class="btn-danger" onclick="goWardrobeScreen()">👗 Шкаф руу орох</button>
+    <div id="message">Амттай хоолнуудаа идэж оноо цуглуулаарай!</div>
+
+    <div id="maze-container">
+        <div id="maze" class="grid"></div>
     </div>
 
-    <!-- 2. ДААЛГАВАР БИЕЛҮҮЛЭХ (МАТЕМАТИК) ДЭЛГЭЦ -->
-    <div id="screen-math" class="screen">
-        <h2>🧠 Хурдан бодох даалгавар</h2>
-        <p>Бодлогыг зөв бодвол хувцас авах зоос өгнө. Буруу бодвол зоос хасагдана шүү, ухаалаг байгаарай!</p>
-        
-        <div class="math-box">
-            <div class="math-question" id="math-quest">12 x 4 = ?</div>
-            <input type="number" id="math-ans" class="math-input" placeholder="Хариу">
-            <br><br>
-            <button class="btn-success" onclick="checkAnswer()">Хариуг илгээх 🚀</button>
-        </div>
-        <div id="math-feedback" style="font-weight: bold; font-size: 18px;"></div>
-        <br>
-        <button onclick="goMainScreen()">🔙 Буцах</button>
+    <!-- Дэлгэц дээрх удирдлага (Утас эсвэл таблет дээр тоглоход амар) -->
+    <div class="controls">
+        <div></div><button class="ctrl-btn" onclick="moveCat(0, -1)">▲</button><div></div>
+        <button class="ctrl-btn" onclick="moveCat(-1, 0)">◀</button>
+        <button class="ctrl-btn" onclick="moveCat(0, 1)">▼</button>
+        <button class="ctrl-btn" onclick="moveCat(1, 0)">▶</button>
     </div>
 
-    <!-- 3. ШКАФНААС ХУВЦАС ХУДАНДАН АВАХ БА ӨМСӨХ -->
-    <div id="screen-wardrobe" class="screen">
-        <h2>👗 Муурын ганган шкаф</h2>
-        <p>Цуглуулсан зоосоороо хувцас худалдаж ав. Хувцас болгон муурын чадлыг нэмнэ!</p>
-        <div class="cat-preview" id="wardrobe-cat-view">🐱</div>
-        
-        <div class="wardrobe" id="wardrobe-list"></div>
-        
-        <button class="btn-success" style="font-size: 22px;" onclick="goBattleScreen()">⚔️ ОНЛАЙН BATTLE-Д ОРОХ ⚔️</button>
-        <br><br>
-        <button onclick="goMainScreen()">🔙 Буцах</button>
-    </div>
-
-    <!-- 4. ЖИНХЭНЭ ТЭМЦЭЭН -->
-    <div id="screen-battle" class="screen">
-        <h2>🔥 СҮҮЛЧИЙН ШҮҮЛТ 🔥</h2>
-        <div class="battle-arena">
-            <div>
-                <h3>Гүнжээгийн муур</h3>
-                <div class="cat-preview" id="b-p1-cat">🐱</div>
-                <div style="font-weight:bold; color:#4cd137;">Чадал: <span id="b-p1-power">0</span></div>
-            </div>
-            <div class="vs">VS</div>
-            <div>
-                <h3>Онлайн өрсөлдөгч</h3>
-                <div class="cat-preview" id="b-p2-cat">🐈🎩</div>
-                <div style="font-weight:bold; color:#e84118;">Чадал: <span id="b-p2-power">0</span></div>
-            </div>
-        </div>
-        <div id="battle-log">Шүүгчид хувцаслалтыг шалгаж байна...</div>
-        <button onclick="goMainScreen()">Дахин шинээр эхлэх 🔄</button>
-    </div>
+    <button class="btn-action" onclick="restartGame()">Шинээр эхлэх 🔄</button>
 </div>
 
 <script>
-    // Тоглоомын гол өгөгдөл
-    let coins = 0;
-    let totalPower = 0;
-    let selectedCat = '🐱';
-    let currentQuestion = {};
+    let level = 1;
+    let score = 0;
+    let catPos = { x: 0, y: 0 };
+    let mazeSize = 9; // Эхний үеийн хэмжээ 9х9
+    let map = [];
+    let botProgress = 0;
+    let botTimer = null;
+    let gameActive = true;
 
-    // 10 настай хүүхдэд тохирсон үнэтэй, өндөр чадалтай гоё хувцаснууд
-    const shopItems = [
-        { id: 1, name: 'Сургуулийн тууз', emoji: '🎀', price: 20, power: 15, owned: false, equipped: false },
-        { id: 2, name: 'Загварын нүдний шил', emoji: '🕶️', price: 45, power: 30, owned: false, equipped: false },
-        { id: 3, name: 'Шидтэний өндөр малгай', emoji: '🎩', price: 80, power: 60, owned: false, equipped: false },
-        { id: 4, name: 'Хатан хааны алтан титэм', emoji: '👑', price: 150, power: 120, owned: false, equipped: false },
-        { id: 5, name: 'Мөрдөгчийн цув', emoji: '🧥', price: 70, power: 50, owned: false, equipped: false },
-        { id: 6, name: 'Алмазан зүүлт', emoji: '💎', price: 200, power: 180, owned: false, equipped: false },
-        { id: 7, name: 'Ялагчийн тууз', emoji: '🎗️', price: 35, power: 25, owned: false, equipped: false }
-    ];
-
-    function updateTopBar() {
-        document.getElementById('global-coins').innerText = coins;
-        // Нийт чадлыг тооцох
-        totalPower = shopItems.filter(i => i.equipped).reduce((sum, i) => sum + i.power, 0);
-        document.getElementById('global-power').innerText = totalPower;
-    }
-
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
-
-    // --- СҮҮР ХУУДАС ---
-    function changeCat(cat) {
-        selectedCat = cat;
-        updateCatPreviews();
-    }
-    function updateCatPreviews() {
-        let equippedEmojis = shopItems.filter(i => i.equipped).map(i => i.emoji).join('');
-        document.getElementById('main-cat-view').innerText = selectedCat + equippedEmojis;
-        document.getElementById('wardrobe-cat-view').innerText = selectedCat + equippedEmojis;
-    }
-    function goMainScreen() { showScreen('screen-main'); updateCatPreviews(); }
-
-    // --- МАТЕМАТИКИЙН ДААЛГАВАР (10 НАСТАЙ) ---
-    function goMathScreen() {
-        showScreen('screen-math');
-        generateQuestion();
-    }
-    function generateQuestion() {
-        document.getElementById('math-ans').value = '';
-        document.getElementById('math-feedback').innerText = '';
-        
-        // 10 насныханд зориулсан үржүүлэх, хуваах, хасах холимог бодлого
-        let types = ['multiply', 'divide', 'complex'];
-        let type = types[Math.floor(Math.random() * types.length)];
-        let num1, num2, num3, qText, ans;
-
-        if (type === 'multiply') {
-            num1 = Math.floor(Math.random() * 12) + 4; // 4-15
-            num2 = Math.floor(Math.random() * 9) + 3;  // 3-11
-            qText = `${num1} х ${num2} = ?`;
-            ans = num1 * num2;
-        } else if (type === 'divide') {
-            num2 = Math.floor(Math.random() * 8) + 3;  // 3-10
-            ans = Math.floor(Math.random() * 10) + 4;  // 4-13
-            num1 = num2 * ans;
-            qText = `${num1} ÷ ${num2} = ?`;
-        } else {
-            num1 = Math.floor(Math.random() * 50) + 30;
-            num2 = Math.floor(Math.random() * 25) + 5;
-            num3 = Math.floor(Math.random() * 15) + 2;
-            qText = `(${num1} - ${num2}) + ${num3} = ?`;
-            ans = (num1 - num2) + num3;
+    // Үеүдийн газрын зураг (1 = Хана, 0 = Зам, S = Эхлэл, E = Бариа, F = Загас, M = Хулгана)
+    // Гүнжээ, үе ахих тусам төөрдөг байшин томорч, зам нь хэцүү болно!
+    const levelsData = {
+        1: {
+            size: 9,
+            grid: [
+                ['S', 0, 1, 0, 'F', 0, 1, 0, 'M'],
+                [1, 0, 1, 0, 1, 0, 1, 1, 0],
+                [1, 'M', 0, 0, 1, 'F', 0, 0, 0],
+                [1, 1, 1, 0, 1, 1, 1, 1, 0],
+                [0, 0, 0, 'F', 0, 0, 0, 1, 0],
+                [0, 1, 1, 1, 1, 1, 0, 1, 0],
+                [0, 1, 'M', 0, 0, 1, 0, 0, 0],
+                [0, 1, 0, 1, 0, 1, 1, 1, 0],
+                ['F', 0, 0, 1, 0, 0, 0, 0, 'E']
+            ]
+        },
+        2: {
+            size: 11,
+            grid: [
+                ['S', 1, 0, 0, 0, 1, 'M', 0, 0, 0, 'F'],
+                [0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0],
+                [0, 0, 'F', 1, 'M', 0, 0, 0, 0, 1, 0],
+                [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+                [0, 0, 0, 0, 0, 'F', 0, 1, 0, 0, 0],
+                [0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1],
+                [0, 1, 'M', 0, 0, 1, 0, 0, 0, 'M', 0],
+                [0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0],
+                [0, 1, 0, 1, 0, 0, 0, 'F', 0, 1, 0],
+                [0, 0, 'F', 1, 1, 1, 1, 1, 0, 1, 0],
+                [1, 1, 0, 0, 0, 'M', 0, 0, 0, 1, 'E']
+            ]
+        },
+        3: { // Хамгийн том, хамгийн хэцүү үе!
+            size: 13,
+            grid: [
+                ['S', 0, 0, 1, 'F', 0, 0, 1, 0, 0, 0, 0, 'M'],
+                [1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0],
+                ['M', 0, 0, 0, 0, 1, 0, 1, 'F', 1, 'F', 0, 0],
+                [1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1],
+                [0, 0, 'F', 1, 0, 1, 0, 0, 0, 1, 0, 1, 'M'],
+                [0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0],
+                [0, 1, 0, 0, 'M', 0, 0, 1, 0, 0, 0, 1, 0],
+                [0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0],
+                [0, 0, 0, 'F', 0, 1, 0, 0, 0, 'M', 0, 0, 0],
+                [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+                ['M', 0, 0, 1, 0, 0, 0, 'F', 0, 1, 'F', 0, 0],
+                [0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1],
+                ['F', 1, 0, 0, 0, 'M', 0, 0, 0, 1, 0, 0, 'E']
+            ]
         }
+    };
 
-        currentQuestion = { text: qText, answer: ans };
-        document.getElementById('math-quest').innerText = currentQuestion.text;
-    }
-
-    function checkAnswer() {
-        let userAns = parseInt(document.getElementById('math-ans').value);
-        let feedback = document.getElementById('math-feedback');
+    function initGame() {
+        gameActive = true;
+        let data = levelsData[level];
+        mazeSize = data.size;
+        // Газрын зургийг хуулбарлаж авна (хоолнуудыг нь идэхэд устгахын тулд)
+        map = JSON.parse(JSON.stringify(data.grid)); 
         
-        if (userAns === currentQuestion.answer) {
-            let reward = Math.floor(Math.random() * 15) + 20; // 20-35 зоос авна
-            coins += reward;
-            feedback.innerHTML = `<span style="color:#4cd137;">Зөв байна, Гүнжээ! Илүү ухаалаг байж чадлаа. +${reward} зоос 💰</span>`;
-            updateTopBar();
-            setTimeout(generateQuestion, 2000);
-        } else {
-            coins = Math.max(0, coins - 10); // Буруу бол 10 зоос хасна
-            feedback.innerHTML = `<span style="color:#e84118;">Өвөөг, буруу байна! Зөв хариу нь ${currentQuestion.answer} байсан юм. -10 зоос 🪙</span>`;
-            updateTopBar();
-            setTimeout(generateQuestion, 2500);
-        }
-    }
+        catPos = { x: 0, y: 0 };
+        botProgress = 0;
+        
+        document.getElementById('ui-level').innerText = level;
+        document.getElementById('ui-score').innerText = score;
+        document.getElementById('ui-bot').innerText = "0%";
+        document.getElementById('message').innerText = `Үе ${level}: Барианд орохоос өмнө амттан цуглуулаарай!`;
 
-    // --- ШКАФНЫ ХЭСЭГ ---
-    function goWardrobeScreen() {
-        showScreen('screen-wardrobe');
-        renderWardrobe();
-    }
-    function renderWardrobe() {
-        const container = document.getElementById('wardrobe-list');
-        container.innerHTML = '';
-
-        shopItems.forEach(item => {
-            const card = document.createElement('div');
-            let statusClass = '';
-            let actionText = `💰 ${item.price}`;
+        renderMaze();
+        
+        // Онлайн өрсөлдөгч робот цаанаас чинь хөөж эхэлнэ
+        if(botTimer) clearInterval(botTimer);
+        let botSpeed = 2500 - (level * 500); // Үе ахих тусам робот хурдан гүйнэ!
+        botTimer = setInterval(() => {
+            if(!gameActive) return;
+            botProgress += Math.floor(Math.random() * 8) + 4;
+            if(botProgress > 100) botProgress = 100;
+            document.getElementById('ui-bot').innerText = botProgress + "%";
             
-            if (item.equipped) {
-                statusClass = 'equipped';
-                actionText = 'Өмссөн 👑';
-            } else if (item.owned) {
-                statusClass = 'owned';
-                actionText = 'Тайчсан (Өмсөх)';
+            if(botProgress >= 100) {
+                endGame(false); // Робот түрүүлээд барианд орчихвол
             }
-
-            card.className = `item-card ${statusClass}`;
-            card.onclick = () => handleItemClick(item);
-            card.innerHTML = `
-                <span class="item-emoji">${item.emoji}</span>
-                <div style="font-weight:bold;font-size:14px;">${item.name}</div>
-                <div class="item-power">💪 Чадал: +${item.power}</div>
-                <div class="item-price">${actionText}</div>
-            `;
-            container.appendChild(card);
-        });
-        updateCatPreviews();
+        }, botSpeed);
     }
 
-    function handleItemClick(item) {
-        if (!item.owned) {
-            // Худалдаж авах хэсэг
-            if (coins >= item.price) {
-                coins -= item.price;
-                item.owned = true;
-                item.equipped = true;
-                alert(`Амжилттай худалдаж авлаа! Муурын чадал чинь +${item.power}-аар нэмэгдлээ! ✨`);
+    function renderMaze() {
+        const mazeContainer = document.getElementById('maze');
+        mazeContainer.style.gridTemplateColumns = `repeat(${mazeSize}, 35px)`;
+        mazeContainer.innerHTML = '';
+
+        for (let y = 0; y < mazeSize; y++) {
+            for (let x = 0; x < mazeSize; x++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                
+                let tile = map[y][x];
+                
+                if (tile === 1) cell.classList.add('wall');
+                else if (tile === 0) cell.classList.add('path');
+                else if (tile === 'S') cell.classList.add('start');
+                else if (tile === 'E') { cell.classList.add('end'); cell.innerText = '🚩'; }
+                else if (tile === 'F') { cell.classList.add('path'); cell.innerText = '🐟'; }
+                else if (tile === 'M') { cell.classList.add('path'); cell.innerText = '🐭'; }
+                
+                // Муурны одоогийн байрлал
+                if (catPos.x === x && catPos.y === y) {
+                    cell.innerText = '🐱';
+                }
+                
+                mazeContainer.appendChild(cell);
+            }
+        }
+    }
+
+    function moveCat(dx, dy) {
+        if (!gameActive) return;
+
+        let newX = catPos.x + dx;
+        let newY = catPos.y + dy;
+
+        // Мэйзээс гарахгүй бөгөөд хана мөргөхгүй байхыг шалгана
+        if (newX >= 0 && newX < mazeSize && newY >= 0 && newY < mazeSize) {
+            if (map[newY][newX] !== 1) { 
+                catPos.x = newX;
+                catPos.y = newY;
+                
+                // Замдаа юм идвэл оноо авна
+                if (map[newY][newX] === 'F') {
+                    score += 15; // Загас 15 оноо
+                    map[newY][newX] = 0;
+                    document.getElementById('message').innerText = "Амттай загас идлээ! +15 оноо 🐟";
+                } else if (map[newY][newX] === 'M') {
+                    score += 25; // Хулгана 25 оноо
+                    map[newY][newX] = 0;
+                    document.getElementById('message').innerText = "Хурдан хулгана барилаа! +25 оноо 🐭";
+                }
+                
+                document.getElementById('ui-score').innerText = score;
+                renderMaze();
+                
+                // Барианд орсон эсэхийг шалгах
+                if (map[newY][newX] === 'E') {
+                    endGame(true);
+                }
+            }
+        }
+    }
+
+    function endGame(isCatWin) {
+        gameActive = false;
+        clearInterval(botTimer);
+        
+        const msg = document.getElementById('message');
+        if (isCatWin) {
+            if (level < 3) {
+                msg.innerHTML = `<span style="color:#4cd137;">🎉 ТҮРҮҮЛЛЭЭ! Гүнжээ роботоос өмнө барианд орлоо! Одоо дараагийн үе рүү...</span>`;
+                setTimeout(() => {
+                    level++;
+                    initGame();
+                }, 2500);
             } else {
-                alert("Уучлаарай Гүнжээ, чамд зоос дутаж байна. Даалгавраа илүү сайн хийгээрэй! ✏️");
+                msg.innerHTML = `<span style="color:#fbc531;">🏆 БАЯР ХҮРГЭЕ! Гүнжээ бүх Maze-ийг дуусгаж, нийт ${score} оноотойгоор ТОГЛООМЫН СУПЕР ЯЛАГЧ боллоо! 👑</span>`;
             }
         } else {
-            // Өмсөх эсвэл тайлах хэсэг
-            item.equipped = !item.equipped;
+            msg.innerHTML = `<span style="color:#e84118;">😿 ХАРАМСАЛТАЙ НЬ ЯЛАГДЛАА! Өрсөлдөгч онлайн муур түрүүлээд 100% барианд орчихлоо. Дахин оролдоод үзээрэй!</span>`;
         }
-        updateTopBar();
-        renderWardrobe();
     }
 
-    // --- ЖИНХЭНЭ ТЭМЦЭЭН (BATTLE) ---
-    function goBattleScreen() {
-        showScreen('screen-battle');
-        
-        let equippedEmojis = shopItems.filter(i => i.equipped).map(i => i.emoji).join('');
-        document.getElementById('b-p1-cat').innerText = selectedCat + equippedEmojis;
-        document.getElementById('b-p1-power').innerText = totalPower;
-
-        // Онлайн робот тоглогч 10 настай хүүхдийн хэмжээний өндөр чадалтай гарч ирнэ (Азаар биш чадлаар үзнэ)
-        const botCats = ['🐱', '🐈', '🦁'];
-        let randomBotCat = botCats[Math.floor(Math.random() * botCats.length)];
-        
-        // Робот санамсаргүй чадал авна (40 - 220 хооронд)
-        let botPower = Math.floor(Math.random() * 180) + 40; 
-        let botAcc = '';
-        if(botPower > 150) botAcc = '👑💎';
-        else if(botPower > 90) botAcc = '🎩🕶️';
-        else botAcc = '🧥🎀';
-
-        document.getElementById('b-p2-cat').innerText = randomBotCat + botAcc;
-        document.getElementById('b-p2-power').innerText = botPower;
-
-        let log = document.getElementById('battle-log');
-        log.innerText = "Шүүгчид хувцасны үнэ болон чадлыг тоолж байна... 🤔";
-
-        setTimeout(() => {
-            if (totalPower > botPower) {
-                log.innerHTML = `🎉 ЯЛАЛТ! Гүнжээ маш ухаалаг тактик хэрэглэж, хэцүү бодлого бодож авсан хувцаснуудаараа өрсөлдөгчөө БҮТЭН ЯЛЛАА! 🏆`;
-                log.style.color = "#4cd137";
-            } else if (totalPower < botPower) {
-                log.innerHTML = `😿 ЯЛАГДЛАА! Өрсөлдөгч муурын чадал арай илүү байлаа. Дахин зоос цуглуулаад бүр илүү үнэтэй Алмазан зүүлт (💎) аваад ирээрэй!`;
-                log.style.color = "#e84118";
-            } else {
-                log.innerHTML = `🤝 ТЭНЦЛЭЭ! Хоёр талын загварын мэдрэмж яг ижилхэн хүчтэй байна!`;
-                log.style.color = "#fbc531";
-            }
-        }, 2000);
+    function restartGame() {
+        level = 1;
+        score = 0;
+        initGame();
     }
+
+    // Компьютерын гарны сумаар удирдах хэсэг
+    window.addEventListener('keydown', (e) => {
+        if(e.key === "ArrowUp" || e.key === "w") moveCat(0, -1);
+        if(e.key === "ArrowDown" || e.key === "s") moveCat(0, 1);
+        if(e.key === "ArrowLeft" || e.key === "a") moveCat(-1, 0);
+        if(e.key === "ArrowRight" || e.key === "d") moveCat(1, 0);
+    });
+
+    // Тоглоомыг эхлүүлэх
+    window.onload = initGame;
 </script>
 
 </body>
